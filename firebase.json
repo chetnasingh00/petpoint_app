@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"petpoint-app","appId":"1:25676779891:android:76aa78cd5c4dc7e224b506","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"petpoint-app","configurations":{"android":"1:25676779891:android:76aa78cd5c4dc7e224b506","web":"1:25676779891:web:5ca9cbf8ffef3bec24b506"}}}}}}

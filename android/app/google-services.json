@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "25676779891",
+    "project_id": "petpoint-app",
+    "storage_bucket": "petpoint-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:25676779891:android:76aa78cd5c4dc7e224b506",
+        "android_client_info": {
+          "package_name": "com.example.petpoint_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq8-smKqCZD-2xsJh3tKPRzmfI-8yqrIM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
