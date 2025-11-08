@@ -33,10 +33,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -65,4 +62,14 @@ class DefaultFirebaseOptions {
     projectId: 'petpoint-app',
     storageBucket: 'petpoint-app.firebasestorage.app',
   );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyC5To19NBIKBjfmcOe7gFNnh8NJ5Ymj-ow',
+    appId: '1:25676779891:web:83629fdcc942578324b506',
+    messagingSenderId: '25676779891',
+    projectId: 'petpoint-app',
+    authDomain: 'petpoint-app.firebaseapp.com',
+    storageBucket: 'petpoint-app.firebasestorage.app',
+  );
+
 }

@@ -1,77 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+// Import firebase options file
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Import all screens
+import 'screens/welcome_page.dart';
 import 'screens/login_page.dart';
+import 'screens/signup_page.dart';
+import 'screens/home_page.dart';
 
-
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Initialize Firebase correctly for all platforms (including web)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runApp(const PetPoint());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PetPoint extends StatelessWidget {
+  const PetPoint({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'PetPoint 🐾',
       debugShowCheckedModeBanner: false,
-      title: 'PetPoint',
       theme: ThemeData(
         primarySwatch: Colors.teal,
+        scaffoldBackgroundColor: Colors.teal.shade50,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.teal,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            side: const BorderSide(color: Colors.teal, width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+        ),
       ),
-      home: const LoginPage(),
-    );
-  }
-}
 
-class DoctorListScreen extends StatelessWidget {
-  const DoctorListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final doctors = FirebaseFirestore.instance.collection('doctors');
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Available Doctors'),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: doctors.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No doctors found.'));
-          }
-
-          final docs = snapshot.data!.docs;
-
-          return ListView.builder(
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final doc = docs[index];
-              final data = doc.data() as Map<String, dynamic>;
-
-              return Card(
-                margin: const EdgeInsets.all(10),
-                child: ListTile(
-                  title: Text(data['name'] ?? ''),
-                  subtitle: Text('${data['specialization'] ?? ''}\n${data['address'] ?? ''}'),
-                  trailing: Text('⭐ ${data['rating'] ?? ''}'),
-                  isThreeLine: true,
-                ),
-              );
-            },
-          );
-        },
-      ),
+      // ✅ Define routes for navigation
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const WelcomePage(),
+        '/login': (context) => const LoginPage(),
+        '/signup': (context) => const SignupPage(),
+        '/home': (context) => const HomeScreen(),
+      },
     );
   }
 }

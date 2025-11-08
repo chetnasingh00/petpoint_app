@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../notification_service.dart';
 
 class AppointmentFormPage extends StatefulWidget {
   final String doctorId;
@@ -23,13 +24,15 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
   TimeOfDay? selectedTime;
   bool isSaving = false;
 
+  /// Book the appointment and schedule a notification reminder
   Future<void> bookAppointment() async {
     final user = FirebaseAuth.instance.currentUser;
-    print("Booking appointment for UID: ${user?.uid}");
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You must be logged in to book an appointment.")),
+        const SnackBar(
+          content: Text("You must be logged in to book an appointment."),
+        ),
       );
       return;
     }
@@ -52,7 +55,9 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
     setState(() => isSaving = true);
 
     try {
-      final docRef = await FirebaseFirestore.instance.collection('appointments').add({
+      final docRef = await FirebaseFirestore.instance
+          .collection('appointments')
+          .add({
         'ownerId': user.uid,
         'doctorId': widget.doctorId,
         'doctorName': widget.doctorName,
@@ -63,7 +68,16 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
         'createdAt': Timestamp.now(),
       });
 
-      print("Appointment saved with ID: ${docRef.id} for user ${user.uid}");
+      // ✅ Schedule a test reminder (fires in 15 seconds)
+      await NotificationService.scheduleReminderNotification(
+        title: "🐾 Appointment Reminder",
+        body:
+            "You have an appointment with ${widget.doctorName} for $selectedPet at ${selectedTime!.format(context)}.",
+        scheduledTime: DateTime.now().add(const Duration(seconds: 15)),
+      );
+
+      // ✅ For production, replace the above with:
+      // scheduledTime: appointmentDate.subtract(const Duration(minutes: 10)),
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Appointment booked successfully!")),
@@ -71,10 +85,9 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
 
       Navigator.pop(context);
     } catch (e) {
-      print("Error saving appointment: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to book appointment: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to book appointment: $e")));
     } finally {
       setState(() => isSaving = false);
     }
@@ -83,6 +96,7 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+
     if (user == null) {
       return const Scaffold(
         body: Center(child: Text("Please log in first.")),
@@ -105,7 +119,9 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
           stream: petsRef.snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return Center(child: Text("Error loading pets: ${snapshot.error}"));
+              return Center(
+                child: Text("Error loading pets: ${snapshot.error}"),
+              );
             }
 
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -113,7 +129,6 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
             }
 
             final pets = snapshot.data!.docs;
-            print("Found ${pets.length} pets for UID: ${user.uid}");
 
             if (pets.isEmpty) {
               return const Center(
@@ -138,19 +153,29 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: "Appointment Type"),
+                  decoration: const InputDecoration(
+                    labelText: "Appointment Type",
+                  ),
                   value: appointmentType,
                   items: const [
-                    DropdownMenuItem(value: "Clinic", child: Text("Clinic Visit")),
-                    DropdownMenuItem(value: "Home", child: Text("Home Visit")),
+                    DropdownMenuItem(
+                      value: "Clinic",
+                      child: Text("Clinic Visit"),
+                    ),
+                    DropdownMenuItem(
+                      value: "Home",
+                      child: Text("Home Visit"),
+                    ),
                   ],
                   onChanged: (value) => setState(() => appointmentType = value),
                 ),
                 const SizedBox(height: 12),
                 ListTile(
-                  title: Text(selectedDate == null
-                      ? "Choose Date"
-                      : "${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}"),
+                  title: Text(
+                    selectedDate == null
+                        ? "Choose Date"
+                        : "${selectedDate!.day}-${selectedDate!.month}-${selectedDate!.year}",
+                  ),
                   trailing: const Icon(Icons.calendar_today),
                   onTap: () async {
                     final date = await showDatePicker(
@@ -163,9 +188,11 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
                   },
                 ),
                 ListTile(
-                  title: Text(selectedTime == null
-                      ? "Choose Time"
-                      : selectedTime!.format(context)),
+                  title: Text(
+                    selectedTime == null
+                        ? "Choose Time"
+                        : selectedTime!.format(context),
+                  ),
                   trailing: const Icon(Icons.access_time),
                   onTap: () async {
                     final time = await showTimePicker(

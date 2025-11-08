@@ -12,7 +12,6 @@ class AddPetPage extends StatefulWidget {
 class _AddPetPageState extends State<AddPetPage> {
   final nameController = TextEditingController();
   final speciesController = TextEditingController();
-  final breedController = TextEditingController();
   final ageController = TextEditingController();
   final notesController = TextEditingController();
 
@@ -29,7 +28,6 @@ class _AddPetPageState extends State<AddPetPage> {
     final petData = {
       'name': nameController.text.trim(),
       'species': speciesController.text.trim(),
-      'breed': breedController.text.trim(),
       'age': int.tryParse(ageController.text.trim()) ?? 0,
       'notes': notesController.text.trim(),
       'createdAt': Timestamp.now(),
@@ -57,40 +55,34 @@ class _AddPetPageState extends State<AddPetPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Pet Name'),
-              ),
-              TextField(
-                controller: speciesController,
-                decoration: const InputDecoration(labelText: 'Species (Dog, Cat, etc.)'),
-              ),
-              TextField(
-                controller: breedController,
-                decoration: const InputDecoration(labelText: 'Breed (e.g. Poodle, Persian)'),
-              ),
-              TextField(
-                controller: ageController,
-                decoration: const InputDecoration(labelText: 'Age (years)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: notesController,
-                decoration: const InputDecoration(labelText: 'Notes / Vaccination info'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: isSaving ? null : savePet,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                child: isSaving
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Save Pet"),
-              ),
-            ],
-          ),
+        child: Column(
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Pet Name'),
+            ),
+            TextField(
+              controller: speciesController,
+              decoration: const InputDecoration(labelText: 'Species (Dog, Cat, etc.)'),
+            ),
+            TextField(
+              controller: ageController,
+              decoration: const InputDecoration(labelText: 'Age (years)'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: notesController,
+              decoration: const InputDecoration(labelText: 'Notes / Vaccination info'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: isSaving ? null : savePet,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+              child: isSaving
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Save Pet"),
+            ),
+          ],
         ),
       ),
     );

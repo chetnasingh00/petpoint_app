@@ -1,88 +1,39 @@
 import 'package:flutter/material.dart';
-import 'pet_list_page.dart';
-import 'doctor_list_page.dart';
-import 'my_appointments_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF9F9F9),
       appBar: AppBar(
-        title: const Text('Welcome to PetPoint 🐾'),
         backgroundColor: Colors.teal,
-        centerTitle: true,
+        elevation: 0,
+        title: const Text("PetPoint", style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Choose an option below:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 30),
-
-            ElevatedButton.icon(
-              icon: const Icon(Icons.pets),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                  minimumSize: const Size(double.infinity, 48)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PetListPage()),
-                );
-              },
-              label: const Text(
-                "View / Add My Pets 🐾",
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            ElevatedButton.icon(
-              icon: const Icon(Icons.local_hospital),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                  minimumSize: const Size(double.infinity, 48)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DoctorListPage()),
-                );
-              },
-              label: const Text(
-                "Book Doctor Appointment 🩺",
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            ElevatedButton.icon(
-              icon: const Icon(Icons.calendar_month),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                  minimumSize: const Size(double.infinity, 48)),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MyAppointmentsPage()),
-                );
-              },
-              label: const Text(
-                "My Appointments 📅",
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
-          ],
+      body: Center(
+        child: Text(
+          "Hi, ${user?.displayName ?? 'Pet Lover'} 👋\nWelcome to PetPoint!",
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ),
     );

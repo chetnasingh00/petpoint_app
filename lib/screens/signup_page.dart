@@ -24,14 +24,12 @@ class _SignupPageState extends State<SignupPage> {
     });
 
     try {
-      // Create user in Firebase Auth
-      UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
 
-      // Save owner info in Firestore
       await FirebaseFirestore.instance
           .collection('owners')
           .doc(userCredential.user!.uid)
@@ -41,11 +39,12 @@ class _SignupPageState extends State<SignupPage> {
         'createdAt': Timestamp.now(),
       });
 
-      // Navigate to home page
+      await userCredential.user!.updateDisplayName(nameController.text.trim());
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -62,27 +61,24 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Card(
             elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(
                     "Create Account",
                     style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal,
-                    ),
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal),
                   ),
                   const SizedBox(height: 20),
                   TextField(
@@ -111,10 +107,8 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   const SizedBox(height: 20),
                   if (errorMessage != null)
-                    Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
+                    Text(errorMessage!,
+                        style: const TextStyle(color: Colors.red)),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: isLoading ? null : signupUser,
@@ -124,15 +118,12 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Sign Up',
-                            style: TextStyle(fontSize: 18),
-                          ),
+                        : const Text('Sign Up', style: TextStyle(fontSize: 18)),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context); // Go back to Login Page
+                      Navigator.pop(context);
                     },
                     child: const Text("Already have an account? Login"),
                   ),
