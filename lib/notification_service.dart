@@ -3,39 +3,44 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'dart:math';
 
+/// A utility class for handling all local notifications in the PetPoint app.
+/// Includes instant notifications and scheduled reminders for appointments.
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
   /// Initialize local notifications
   static Future<void> init() async {
-    // Initialize timezone data
+    // Initialize timezone data for accurate scheduling
     tz.initializeTimeZones();
 
+    // Android initialization
     const AndroidInitializationSettings androidInit =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const DarwinInitializationSettings iosInit =
-        DarwinInitializationSettings(
+    // iOS initialization
+    const DarwinInitializationSettings iosInit = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
 
+    // Combine settings
     const InitializationSettings initSettings = InitializationSettings(
       android: androidInit,
       iOS: iosInit,
     );
 
+    // Initialize plugin
     await _notificationsPlugin.initialize(initSettings);
 
-    // ✅ Request notification permission on Android 13+ devices
+    // Request notification permission (for Android 13+)
     final androidImplementation = _notificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
     await androidImplementation?.requestNotificationsPermission();
 
-    print("✅ NotificationService initialized");
+    print("✅ NotificationService initialized successfully");
   }
 
   /// Show an instant (immediate) notification
@@ -44,18 +49,19 @@ class NotificationService {
     required String body,
   }) async {
     const androidDetails = AndroidNotificationDetails(
-      'petpoint_channel',
-      'PetPoint Reminders',
+      'petpoint_channel', // Channel ID
+      'PetPoint Reminders', // Channel name
       channelDescription: 'Reminders for upcoming appointments',
       importance: Importance.max,
       priority: Priority.high,
+      playSound: true,
       icon: '@mipmap/ic_launcher',
     );
 
     const iosDetails = DarwinNotificationDetails();
 
     await _notificationsPlugin.show(
-      Random().nextInt(100000), // random ID to avoid overwriting
+      Random().nextInt(100000), // Random ID to avoid collision
       title,
       body,
       const NotificationDetails(android: androidDetails, iOS: iosDetails),
@@ -64,7 +70,7 @@ class NotificationService {
     print("🔔 Instant notification shown: $title");
   }
 
-  /// Schedule a future reminder notification
+  /// Schedule a reminder notification at a specific time
   static Future<void> scheduleReminderNotification({
     required String title,
     required String body,
@@ -76,6 +82,7 @@ class NotificationService {
       channelDescription: 'Reminders for upcoming appointments',
       importance: Importance.max,
       priority: Priority.high,
+      playSound: true,
       icon: '@mipmap/ic_launcher',
     );
 
@@ -83,13 +90,14 @@ class NotificationService {
 
     final id = Random().nextInt(100000);
 
-    print("⏰ Scheduling notification for: $scheduledTime (ID: $id)");
+    // Convert time to local timezone
+    final tzTime = tz.TZDateTime.from(scheduledTime, tz.local);
 
     await _notificationsPlugin.zonedSchedule(
       id,
       title,
       body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
+      tzTime,
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
@@ -97,10 +105,10 @@ class NotificationService {
       matchDateTimeComponents: DateTimeComponents.time,
     );
 
-    print("✅ Notification scheduled successfully");
+    print("⏰ Notification scheduled for: $scheduledTime (ID: $id)");
   }
 
-  /// Cancel all scheduled notifications (optional helper)
+  /// Cancel all notifications (optional helper)
   static Future<void> cancelAll() async {
     await _notificationsPlugin.cancelAll();
     print("🗑️ All notifications canceled");

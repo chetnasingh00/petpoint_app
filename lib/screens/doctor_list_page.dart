@@ -45,9 +45,16 @@ class DoctorListScreen extends StatelessWidget {
               final doc = docs[index];
               final data = doc.data() as Map<String, dynamic>;
 
-              final name = data['name'] ?? 'Doctor';
-              final specialization = data['specialization'] ?? 'Specialist';
-              final address = data['address'] ?? 'Clinic Address';
+              // SAFELY convert fields to String if they are List
+              final name = data['name'] is String
+                  ? data['name']
+                  : (data['name'] as List).join(", ");
+              final specialization = data['specialization'] is String
+                  ? data['specialization']
+                  : (data['specialization'] as List).join(", ");
+              final address = data['address'] is String
+                  ? data['address']
+                  : (data['address'] as List).join(", ");
               final rating = data['rating']?.toString() ?? '4.5';
               final photoUrl = data['photoUrl'] ??
                   'https://cdn-icons-png.flaticon.com/512/3774/3774299.png'; // default doctor icon

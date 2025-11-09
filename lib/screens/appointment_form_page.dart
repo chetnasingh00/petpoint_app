@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../notification_service.dart';
+import '../theme.dart';
 
 class AppointmentFormPage extends StatefulWidget {
-  final String doctorId;
-  final String doctorName;
+  final String? appointmentId;
+  final String? doctorId;
+  final dynamic doctorName; // changed to dynamic to handle String or List
+  final Map<String, dynamic>? existingData;
 
   const AppointmentFormPage({
     super.key,
-    required this.doctorId,
-    required this.doctorName,
+    this.appointmentId,
+    this.doctorId,
+    this.doctorName,
+    this.existingData,
   });
 
   @override
@@ -23,6 +28,14 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   bool isSaving = false;
+
+  /// Converts doctorName safely to a string
+  String get doctorNameString {
+    if (widget.doctorName == null) return '';
+    if (widget.doctorName is String) return widget.doctorName!;
+    if (widget.doctorName is List) return (widget.doctorName as List).join(", ");
+    return widget.doctorName.toString();
+  }
 
   /// Book the appointment and schedule a notification reminder
   Future<void> bookAppointment() async {
@@ -60,7 +73,7 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
           .add({
         'ownerId': user.uid,
         'doctorId': widget.doctorId,
-        'doctorName': widget.doctorName,
+        'doctorName': doctorNameString,
         'petName': selectedPet,
         'appointmentDate': Timestamp.fromDate(appointmentDate),
         'type': appointmentType,
@@ -68,16 +81,12 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
         'createdAt': Timestamp.now(),
       });
 
-      // ✅ Schedule a test reminder (fires in 15 seconds)
       await NotificationService.scheduleReminderNotification(
         title: "🐾 Appointment Reminder",
         body:
-            "You have an appointment with ${widget.doctorName} for $selectedPet at ${selectedTime!.format(context)}.",
+            "You have an appointment with $doctorNameString for $selectedPet at ${selectedTime!.format(context)}.",
         scheduledTime: DateTime.now().add(const Duration(seconds: 15)),
       );
-
-      // ✅ For production, replace the above with:
-      // scheduledTime: appointmentDate.subtract(const Duration(minutes: 10)),
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Appointment booked successfully!")),
@@ -98,9 +107,7 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text("Please log in first.")),
-      );
+      return const Scaffold(body: Center(child: Text("Please log in first.")));
     }
 
     final petsRef = FirebaseFirestore.instance
@@ -110,11 +117,11 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Book with ${widget.doctorName}"),
-        backgroundColor: Colors.teal,
+        title: Text("Book with $doctorNameString"),
+        backgroundColor: AppColors.primaryBlue,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: StreamBuilder<QuerySnapshot>(
           stream: petsRef.snapshots(),
           builder: (context, snapshot) {
@@ -162,15 +169,16 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
                       value: "Clinic",
                       child: Text("Clinic Visit"),
                     ),
-                    DropdownMenuItem(
-                      value: "Home",
-                      child: Text("Home Visit"),
-                    ),
+                    DropdownMenuItem(value: "Home", child: Text("Home Visit")),
                   ],
                   onChanged: (value) => setState(() => appointmentType = value),
                 ),
                 const SizedBox(height: 12),
                 ListTile(
+                  tileColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   title: Text(
                     selectedDate == null
                         ? "Choose Date"
@@ -187,7 +195,12 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
                     if (date != null) setState(() => selectedDate = date);
                   },
                 ),
+                const SizedBox(height: 8),
                 ListTile(
+                  tileColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   title: Text(
                     selectedTime == null
                         ? "Choose Time"
@@ -202,9 +215,12 @@ class _AppointmentFormPageState extends State<AppointmentFormPage> {
                     if (time != null) setState(() => selectedTime = time);
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accentYellow,
+                    foregroundColor: Colors.black87,
+                  ),
                   onPressed: isSaving ? null : bookAppointment,
                   child: isSaving
                       ? const CircularProgressIndicator(color: Colors.white)

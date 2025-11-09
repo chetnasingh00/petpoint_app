@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-// Import firebase options file
 import 'firebase_options.dart';
 
-// Import all screens
+// Screens
 import 'screens/welcome_page.dart';
 import 'screens/login_page.dart';
 import 'screens/signup_page.dart';
 import 'screens/home_page.dart';
+import 'screens/reset_password_page.dart';
+import 'screens/add_pet_page.dart';
+import 'screens/appointment_form_page.dart';
+import 'screens/doctor_list_page.dart';
+import 'screens/my_appointments_page.dart';
+import 'screens/pet_list_page.dart';
+
+// Notification Service
+import 'notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Initialize Firebase correctly for all platforms (including web)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // ✅ Initialize notifications
+  await NotificationService.init();
 
   runApp(const PetPoint());
 }
@@ -41,23 +50,23 @@ class PetPoint extends StatelessWidget {
             ),
           ),
         ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: OutlinedButton.styleFrom(
-            side: const BorderSide(color: Colors.teal, width: 2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-          ),
-        ),
       ),
-
-      // ✅ Define routes for navigation
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomePage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/home': (context) => const HomeScreen(),
+        '/reset-password': (context) => const ResetPasswordPage(),
+
+        // ✅ Newly added routes
+        '/add-pet': (context) => const AddPetPage(),
+        '/doctors': (context) => const DoctorListScreen(),
+        '/pets': (context) => const PetListPage(),
+        '/my-appointments': (context) => const MyAppointmentsPage(),
+        '/appointments': (context) => const AppointmentFormPage(),
+       
+
       },
     );
   }
